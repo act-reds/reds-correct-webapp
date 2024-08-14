@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  name  String?
+  email String @unique
+}
+
+model Course {
+  id         Int         @id @default(autoincrement())
+  name       String
+  year       Int
+  assistants CourseAssistant[] // Many-to-many with Assistant
+  classes    Class[]         // Optional if you want to reference from Course
+
+  @@unique([name, year]) // Ensures that the same course name and year cannot be duplicated
+}
+
+model Class {
+  id         Int            @id @default(autoincrement())
+  name       String
+  courseId   Int
+  course     Course         @relation(fields: [courseId], references: [id])
+  students   Student[]      @relation("ClassStudents") // Many-to-many relationship with Student
+  assistants ClassAssistant[] // Many-to-many with Assistant
+  labs Lab[]
+
+  @@unique([name, courseId]) // Ensures that no two classes within the same course have the same name
+}
+
+model Student {
+  id         Int        @id @default(autoincrement())
+  name       String
+  formation  String 
+  mode       String
+  mail       String     @unique // Ensures that no two students have the same mail
+  classes    Class[]    @relation("ClassStudents") // Many-to-many relationship with Class
+}
+
+model Lab {
+  id         Int        @id @default(autoincrement())
+  name       String
+  classId    Int
+  class      Class      @relation(fields: [classId], references: [id])
+
+  @@unique([name, classId]) // Ensures that no two labs within the same class have the same name
+}
+
+model Assistant {
+  id         Int        @id @default(autoincrement())
+  mail       String     @unique
+  courses    CourseAssistant[] // Many-to-many with Course
+  classes    ClassAssistant[]  // Many-to-many with Class
+}
+
+// Junction table for Assistant <-> Course many-to-many relationship
+model CourseAssistant {
+  courseId   Int
+  assistantId Int
+  course     Course    @relation(fields: [courseId], references: [id])
+  assistant  Assistant @relation(fields: [assistantId], references: [id])
+
+  @@id([courseId, assistantId]) // Composite primary key
+}
+
+// Junction table for Assistant <-> Class many-to-many relationship
+model ClassAssistant {
+  classId    Int
+  assistantId Int
+  class      Class     @relation(fields: [classId], references: [id])
+  assistant  Assistant @relation(fields: [assistantId], references: [id])
+
+  @@id([classId, assistantId]) // Composite primary key
+}
