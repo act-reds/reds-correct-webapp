@@ -39,6 +39,7 @@ const Header: React.FC = () => {
     ? [
         { href: "/corrections", label: "Corrections" },
         { href: "#manage", label: "Manage" },
+        { href: "/grids", label: "Grids" },
         { href: "#help", label: "Help" },
       ]
     : [];

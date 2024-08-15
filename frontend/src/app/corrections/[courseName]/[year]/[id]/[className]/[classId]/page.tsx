@@ -44,6 +44,10 @@ const ClassDetailsPage: React.FC = () => {
     loadLabs();
   }, [classId, activeAccordionKey]);
 
+  const handleSubmitSelectedLab = async (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
   // Handle form submission for adding a new lab
   const handleSubmitLab = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -107,4 +107,30 @@ model ClassAssistant {
   @@id([classId, assistantId]) // Composite primary key
 }
 
+model Grid {
+  id      Int             @id @default(autoincrement())
+  name    String
+  course  String
+  year    Int 
+  sections Section[]
+}
+
+model Section {
+  id      Int              @id @default(autoincrement())
+  name    String
+  weight  Float
+  gridId  Int
+  grid    Grid             @relation(fields: [gridId], references: [id])
+  subsections SubSection[]
+}
+
+model SubSection {
+  id          Int          @id @default(autoincrement())
+  name        String
+  weight      Float   
+  criterion   String
+  sectionId   Int 
+  section     Section      @relation(fields: [sectionId], references: [id])
+}
+
 
