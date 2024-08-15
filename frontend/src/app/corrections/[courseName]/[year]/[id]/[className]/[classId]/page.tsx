@@ -46,6 +46,22 @@ const ClassDetailsPage: React.FC = () => {
 
   const handleSubmitSelectedLab = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const userInput = formData.get("selectedLab") as string;
+    if (userInput === "Select lab") {
+      alert("Please select a lab.");
+      return;
+    }
+
+    const labId = parseInt(userInput as string, 10);
+    const labName = labs.find((lab) => lab.id === labId).name;
+
+    // if()
+    router.push(
+      `/corrections/${params.courseName}/${params.year}/${params.id}/${params.className}/${params.classId}/${labName}/${userInput}`
+    );
   };
 
   // Handle form submission for adding a new lab
@@ -80,7 +96,7 @@ const ClassDetailsPage: React.FC = () => {
         <Accordion.Item eventKey="0">
           <Accordion.Header>Existing labs</Accordion.Header>
           <Accordion.Body>
-            <Form>
+            <Form onSubmit={handleSubmitSelectedLab}>
               <Form.Select aria-label="Select Lab" name="selectedLab">
                 <option>Select lab</option>
                 {labs.map((lab) => (

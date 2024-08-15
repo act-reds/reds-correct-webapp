@@ -109,9 +109,7 @@ model ClassAssistant {
 
 model Grid {
   id      Int             @id @default(autoincrement())
-  name    String
-  course  String
-  year    Int 
+  name    String          @unique
   sections Section[]
 }
 

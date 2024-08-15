@@ -1,4 +1,4 @@
-import { Section } from "../../../../types/GridTypes";
+import { GridData, Section } from "@/components/Grid/GridCreatePage/types";
 
 export async function fetchGrids(): Promise<any[]> {
   try {
@@ -14,11 +14,33 @@ export async function fetchGrids(): Promise<any[]> {
   }
 }
 
-export async function generateGrid(grid: Section[]) {
+export async function generateGrid(
+  gridName: string,
+  sections: Section[]
+): Promise<any> {
   try {
-    return [];
+    const gridData: GridData = {
+      name: gridName,
+      sections,
+    };
+
+    const response = await fetch("/api/data/grids/generate-grid", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(gridData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log("Grid created successfully:", result);
+    return result;
   } catch (error) {
-    console.error("Error creating grid:", error);
-    return [];
+    console.error("Failed to create grid:", error);
+    throw error;
   }
 }
