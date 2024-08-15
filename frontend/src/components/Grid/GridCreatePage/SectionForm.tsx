@@ -1,4 +1,4 @@
-// components/GridCreatePage/SectionForm.tsx
+"use client";
 
 import React from "react";
 import { Button, Form, Col, Row } from "react-bootstrap";
