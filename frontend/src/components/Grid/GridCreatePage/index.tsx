@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, Container } from "react-bootstrap";
+import { Button, Container, Form } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import SectionForm from "./SectionForm";
 import SubSectionForm from "./SubSectionForm";
 import { Section, SubSection } from "./types";
+import { generateGrid } from "@/app/lib/data/grids";
 
 const GridCreatePage: React.FC = () => {
   const [sections, setSections] = useState<Section[]>([]);
@@ -99,41 +100,57 @@ const GridCreatePage: React.FC = () => {
     );
   };
 
+  const handleCreateGrid = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await generateGrid(sections);
+  };
+
   return (
     <Container>
-      <Button variant="primary" onClick={addSection} className="mb-3">
-        Add Section
-      </Button>
-      {sections.map((section) => (
-        <div
-          key={section.id}
-          className="border p-3 mb-3 rounded"
-          style={{ backgroundColor: "white" }}
-        >
-          <SectionForm
-            section={section}
-            onChange={handleSectionChange}
-            onRemove={removeSection}
-          />
-          <Button
-            variant="secondary"
-            onClick={() => addSubSection(section.id)}
-            className="mb-3"
+      <Form onSubmit={handleCreateGrid}>
+        <Button variant="primary" onClick={addSection} className="mb-3">
+          Add Section
+        </Button>
+
+        {sections.map((section) => (
+          <div
+            key={section.id}
+            className="border p-3 mb-3 rounded"
+            style={{ backgroundColor: "white" }}
           >
-            Add Subsection
-          </Button>
-          {section.subsections.map((subSection) => (
-            <SubSectionForm
-              key={subSection.id}
-              subSection={subSection}
-              onChange={(field, value) =>
-                handleSubSectionChange(section.id, subSection.id, field, value)
-              }
-              onRemove={(id) => removeSubSection(section.id, id)}
+            <SectionForm
+              section={section}
+              onChange={handleSectionChange}
+              onRemove={removeSection}
             />
-          ))}
-        </div>
-      ))}
+            <Button
+              variant="secondary"
+              onClick={() => addSubSection(section.id)}
+              className="mb-3"
+            >
+              Add Subsection
+            </Button>
+            {section.subsections.map((subSection) => (
+              <SubSectionForm
+                key={subSection.id}
+                subSection={subSection}
+                onChange={(field, value) =>
+                  handleSubSectionChange(
+                    section.id,
+                    subSection.id,
+                    field,
+                    value
+                  )
+                }
+                onRemove={(id) => removeSubSection(section.id, id)}
+              />
+            ))}
+          </div>
+        ))}
+        <Button variant="success" type="submit">
+          Generate grid
+        </Button>
+      </Form>
     </Container>
   );
 };
