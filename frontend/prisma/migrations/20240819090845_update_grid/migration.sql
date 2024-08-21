@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Lab" ADD COLUMN     "gridId" INTEGER;
+
+-- AddForeignKey
+ALTER TABLE "Lab" ADD CONSTRAINT "Lab_gridId_fkey" FOREIGN KEY ("gridId") REFERENCES "Grid"("id") ON DELETE SET NULL ON UPDATE CASCADE;

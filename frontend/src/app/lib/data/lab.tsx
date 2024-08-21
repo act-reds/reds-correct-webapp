@@ -23,3 +23,33 @@ export async function createLab(
     };
   }
 }
+
+export async function getGridSections(gridId: number) {
+  try {
+    const response = await fetch(`/api/data/grids/${gridId}/sections`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sections for gridId: ${gridId}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching sections:", error);
+    return [];
+  }
+}
+
+export async function getLabData(labId: number) {
+  try {
+    const response = await fetch(`/api/data/lab/${labId}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch lab details");
+    }
+    const labData = await response.json();
+    return labData;
+  } catch (error) {
+    console.error("Error fetching lab details:", error);
+    return [];
+  }
+}

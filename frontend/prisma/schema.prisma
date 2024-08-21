@@ -45,20 +45,31 @@ model Class {
   name       String
   courseId   Int
   course     Course           @relation(fields: [courseId], references: [id])
-  students   ClassStudent[]  
+  students   ClassStudent[]
   assistants ClassAssistant[] // Many-to-many with Assistant
-  labs       Lab[]
+  labs       Lab[]            @relation("LabClass")
 
   @@unique([name, courseId])
 }
 
 model Student {
-  id        Int              @id @default(autoincrement())
-  name      String
-  formation String
-  mode      String
-  mail      String           @unique
-  classes   ClassStudent[]   
+  id          Int                 @id @default(autoincrement())
+  name        String
+  formation   String
+  mode        String
+  mail        String              @unique
+  classes     ClassStudent[]
+  corrections CorrectionStudent[] // A student can be in multiple corrections
+}
+
+// Many-to-many relationship between Correction and Student
+model CorrectionStudent {
+  correctionId Int
+  studentId    Int
+  correction   Correction @relation(fields: [correctionId], references: [id], onDelete: Cascade) // A CorrectionStudent belongs to a correction
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade) // A CorrectionStudent belongs to a student
+
+  @@id([correctionId, studentId]) // Composite primary key
 }
 
 model ClassStudent {
@@ -70,14 +81,37 @@ model ClassStudent {
   @@id([classId, studentId])
 }
 
-
 model Lab {
-  id      Int    @id @default(autoincrement())
-  name    String
-  classId Int
-  class   Class  @relation(fields: [classId], references: [id])
+  id         Int          @id @default(autoincrement())
+  name       String
+  classId    Int
+  class      Class        @relation("LabClass", fields: [classId], references: [id])
+  grid       Grid?        @relation("LabGrid", fields: [gridId], references: [id], onDelete: SetNull) // Named relation
+  gridId     Int? // Nullable field indicating a lab can have no grid
+  Correction Correction[]
 
   @@unique([name, classId]) // Ensures that no two labs within the same class have the same name
+}
+
+model Correction {
+  id                Int                 @id @default(autoincrement())
+  appreciation      String
+  labId             Int
+  lab               Lab                 @relation(fields: [labId], references: [id], onDelete: Cascade)
+  subsectionMarks   SubsectionMark[]
+  CorrectionStudent CorrectionStudent[]
+
+  @@unique([id])
+}
+
+model SubsectionMark {
+  id           Int        @id @default(autoincrement())
+  result       Float
+  correctionId Int
+  correction   Correction @relation(fields: [correctionId], references: [id], onDelete: Cascade)
+  subsectionId Int
+  subsection   SubSection @relation(fields: [subsectionId], references: [id])
+  @@unique([correctionId, subsectionId])
 }
 
 model Assistant {
@@ -108,27 +142,27 @@ model ClassAssistant {
 }
 
 model Grid {
-  id      Int             @id @default(autoincrement())
-  name    String          @unique
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
   sections Section[]
+  labs     Lab[]     @relation("LabGrid") // Define relation here
 }
 
 model Section {
-  id      Int              @id @default(autoincrement())
-  name    String
-  weight  Float
-  gridId  Int
-  grid    Grid             @relation(fields: [gridId], references: [id])
+  id          Int          @id @default(autoincrement())
+  name        String
+  weight      Float
+  gridId      Int
+  grid        Grid         @relation(fields: [gridId], references: [id])
   subsections SubSection[]
 }
 
 model SubSection {
-  id          Int          @id @default(autoincrement())
-  name        String
-  weight      Float   
-  criterion   String
-  sectionId   Int 
-  section     Section      @relation(fields: [sectionId], references: [id])
+  id             Int              @id @default(autoincrement())
+  name           String
+  weight         Float
+  criterion      String
+  sectionId      Int
+  section        Section          @relation(fields: [sectionId], references: [id])
+  SubsectionMark SubsectionMark[]
 }
-
-

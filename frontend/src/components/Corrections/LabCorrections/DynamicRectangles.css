@@ -1,0 +1,82 @@
+/* DynamicRectangles.css */
+
+/* Styles for the "+" button */
+.add-button-card {
+    width: 200px;
+    height: 300px;
+    cursor: pointer;
+    background-color: #dddd; /* Light gray color */
+    color: black;
+    border: 1px solid #9999; /* Gray border */
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 8px; /* Equivalent to Bootstrap's m-2 class */
+  }
+  
+  /* Styles for existing rectangles */
+  .existing-rectangle-card {
+    width: 200px;
+    height: 300px;
+    cursor: pointer;
+    background-color: #f8f9fa; /* Light background color */
+    border: 1px solid #dee2e6; /* Border color */
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin: 8px; /* Equivalent to Bootstrap's m-2 class */
+  }
+  
+  /* Styles for the remove button inside the rectangles */
+  .remove-button {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: 8px; /* Equivalent to Bootstrap's m-2 class */
+  }
+  
+  /* Styles for the modal item card */
+  .modal-item-card {
+    width: 100%;
+    height: 100%;
+    background-color: #f8f9fa; /* Light background color */
+    border: 1px solid #dee2e6; /* Border color */
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Add custom styles for carousel arrows */
+.carousel-custom .carousel-control-prev,
+.carousel-custom .carousel-control-next {
+  width: 6%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border-radius: 50%;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1; /* Ensure arrows are on top */
+}
+
+.carousel-custom .carousel-control-prev {
+  left: -9%;
+}
+
+.carousel-custom .carousel-control-next {
+  right: -9%;
+}
+
+/* Optional: Hide default carousel indicators */
+.carousel-custom .carousel-indicators {
+  display: none;
+}
