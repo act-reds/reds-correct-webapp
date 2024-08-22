@@ -34,8 +34,23 @@ export interface SubsectionMark {
 }
 
 export interface CorrectionData {
+  itemId: number;
   labId: number;
   appreciation: string;
   students: Student[];
   subsectionMarks: SubsectionMark[];
+}
+
+export interface SubsectionInfo {
+  id: number;
+  name: string;
+  criterion: string;
+  weight: number;
+}
+
+export interface SectionInfo {
+  id: number;
+  name: string;
+  weight: number;
+  subsections: SubsectionInfo[];
 }

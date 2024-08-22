@@ -4,84 +4,47 @@ import {
   CorrectionData,
   Section,
   SubsectionMark,
+  SectionInfo,
+  SubsectionInfo,
 } from "../../../types/CorrectionTypes";
 
 interface SectionTableWithInputProps {
   labId: number;
-  sections: any;
-  setCorrectionData: React.Dispatch<React.SetStateAction<CorrectionData>>;
+  sections: Section[];
+  activeId: number;
+  correctionData: CorrectionData[];
+  setCorrectionData: React.Dispatch<React.SetStateAction<CorrectionData[]>>;
 }
 
 const SectionTableWithInput: React.FC<SectionTableWithInputProps> = ({
   labId,
   sections,
+  correctionData,
+  activeId,
   setCorrectionData,
 }) => {
-  const [inputValues, setInputValues] = useState({});
-  const [subsectionMarks, setSubsectionMarks] = useState<SubsectionMark[]>([]);
+  const [inputValues, setInputValues] = useState<number[]>([]);
 
-  // Initialize subsectionMarks when sections change
-  useEffect(() => {
-    console.log("OSKOUUUUUUUUUUR");
-    const initializeSubsectionMarks = () => {
-      const marks: SubsectionMark[] = [];
-      sections.forEach((section: Section) => {
-        section.subsections.forEach((subsection: any) => {
-          marks.push({ subsectionId: subsection.id, result: 0 });
-        });
-      });
-      setSubsectionMarks(marks);
-    };
+  const handleInputChange = (subsectionId: number, value: number) => {
+    console.log(`subsectionId: ${subsectionId} -- value: ${value}`);
+    // let numericValue = parseFloat(value);
 
-    if (sections.length > 0) {
-      initializeSubsectionMarks();
-    }
-  }, [sections]); // Runs only when sections change
-
-  useEffect(() => {
-    // Optionally update the parent correction data state
-    setCorrectionData((prev) => ({
-      ...prev,
-      subsectionMarks,
-    }));
-  }, [subsectionMarks]);
-
-  // Handle input change with validation
-  const handleInputChange = (subsectionId, value) => {
-    let numericValue = parseFloat(value);
-
-    if (isNaN(numericValue) || numericValue < 0) {
-      numericValue = 0;
-    } else if (numericValue > 1) {
-      numericValue = 1;
-    }
-
-    setInputValues({
-      ...inputValues,
-      [subsectionId]: numericValue,
-    });
-
-    // Update the subsectionMarks state
-    setSubsectionMarks((prevMarks) =>
-      prevMarks.map((mark) =>
-        mark.subsectionId === subsectionId
-          ? { ...mark, result: numericValue }
-          : mark
-      )
-    );
+    // if (isNaN(numericValue) || numericValue < 0) {
+    //   numericValue = 0;
+    // } else if (numericValue > 1) {
+    //   numericValue = 1;
+    // }
   };
 
   // Calculate section result
-  const calculateSectionResult = (section) => {
+  const calculateSectionResult = (section: Section) => {
     const total = section.subsections.reduce((sum, subsection) => {
       const inputValue = inputValues[subsection.id] || 0;
       return sum + inputValue * subsection.weight;
     }, 0);
-
     const divVal = section.subsections.reduce((div, subsection) => {
       return div + subsection.weight;
     }, 0);
-
     const result = (total / divVal) * section.weight * 5;
     return parseFloat(result.toFixed(2));
   };
@@ -93,6 +56,8 @@ const SectionTableWithInput: React.FC<SectionTableWithInputProps> = ({
     }, 0);
     return (totalResult + 1).toFixed(2);
   };
+
+  console.log("Sections", sections);
 
   return (
     <Container fluid className="mt-3">
@@ -120,7 +85,7 @@ const SectionTableWithInput: React.FC<SectionTableWithInputProps> = ({
                         step="0.01"
                         min="0"
                         max="1"
-                        value={inputValues[subsection.id] || ""}
+                        value={inputValues[subsection.id] || 0}
                         onChange={(e) =>
                           handleInputChange(subsection.id, e.target.value)
                         }

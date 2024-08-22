@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { Carousel, Button, Form, ListGroup } from "react-bootstrap";
+import "./DynamicRectangles.css"; // Import the CSS file
 import SectionTableWithInput from "@/components/Grid/SectionTableWithInput";
 import SectionTable from "@/components/Grid/SectionTable";
 import { CorrectionData, Student } from "../../../../types/CorrectionTypes";
-import "./DynamicRectangles.css";
+
+interface Item {
+  id: number;
+}
 
 interface CorrectionCarouselProps {
-  correctionData: CorrectionData[];
+  items: Item[];
   activeIndex: number;
   onSelect: (selectedIndex: number) => void;
   onButtonClick: (id: number) => void;
   labId: number;
   handleSlide: () => void;
-  setCorrectionData: React.Dispatch<React.SetStateAction<CorrectionData[]>>;
+  setCorrectionData: React.Dispatch<React.SetStateAction<CorrectionData>>;
 }
 
 const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
-  correctionData,
+  items,
   activeIndex,
   onSelect,
   onButtonClick,
@@ -26,23 +30,23 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
 }) => {
   const [data, setData] = useState<any>({});
   const [students, setStudents] = useState<Student[]>([]);
-  const [selectedStudents, setSelectedStudents] = useState<Student[]>(
-    correctionData[activeIndex].students
-  );
+  const [selectedStudents, setSelectedStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<string>("");
   const [sections, setSections] = useState<any[]>([]);
-  const [assistantReview, setAssistantReview] = useState<string>(
-    correctionData[activeIndex].appreciation
-  );
+  const [assistantReview, setAssistantReview] = useState<string>("");
 
+  // Fetch student data on component mount
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
         const response = await fetch(
           `/api/data/lab/${labId}/get-correction-data`
         );
-        if (!response.ok) throw new Error("Failed to fetch data");
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
         const tmpData = await response.json();
+        // console.log(tmpData.gridData);
         setData(tmpData);
         setSections(tmpData.gridData);
         setStudents(
@@ -55,35 +59,44 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
         console.error(error);
       }
     };
+
     fetchStudentData();
-  }, [labId]);
+  }, []);
 
-  const getSelectedStudentIds = () => {
-    const allSelectedIds = correctionData
-      .flatMap((item) => item.students)
-      .map((student) => student.id);
-
-    return new Set(allSelectedIds);
-  };
-
+  // Handle student selection
   const handleSelectStudent = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedName = event.target.value;
     if (selectedName) {
+      // Find the student by name from the data
       const student = data.classStudents.find(
         (stu: any) => stu.name === selectedName
       );
-      if (student && !selectedStudents.some((s) => s.id === student.id)) {
-        setSelectedStudents((prev) => [
-          ...prev,
-          { id: student.id, name: selectedName },
-        ]);
+
+      if (student) {
+        const studentId = student.id;
+        // Check if the student is already selected
+        if (
+          !selectedStudents.some(
+            (selectedStudent) => selectedStudent.id === studentId
+          )
+        ) {
+          // Add the student to the selectedStudents array
+          setSelectedStudents([
+            ...selectedStudents,
+            { id: studentId, name: selectedName },
+          ]);
+        }
+        // Clear the selected student dropdown
         setSelectedStudent("");
       }
     }
   };
 
+  // Handle student removal
   const handleRemoveStudent = (id: number) => {
-    setSelectedStudents((prev) => prev.filter((student) => student.id !== id));
+    setSelectedStudents(
+      selectedStudents.filter((student) => student.id !== id)
+    );
   };
 
   const handleReviewChange = (
@@ -93,49 +106,38 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
   };
 
   useEffect(() => {
-    setCorrectionData((prevCorrectionData) =>
-      prevCorrectionData.map((item, index) => {
-        if (index === activeIndex) {
-          return {
-            ...item,
-            appreciation: assistantReview,
-            students: selectedStudents,
-          };
-        }
-        return item;
-      })
-    );
-  }, [selectedStudents, assistantReview, activeIndex]);
-
-  // Get a Set of IDs of all students already selected
-  const selectedStudentIds = getSelectedStudentIds();
+    setCorrectionData((prev: CorrectionData) => ({
+      ...prev,
+      students: selectedStudents,
+      appreciation: assistantReview,
+    }));
+  }, [selectedStudents, assistantReview]);
 
   return (
     <div>
       <Carousel
-        className="carousel-custom"
         activeIndex={activeIndex}
         onSelect={onSelect}
         interval={null}
+        className="carousel-custom" // Apply custom class
+        // onSlide={testHandleSlide}
       >
-        {correctionData.map((correction, index) => (
-          <Carousel.Item key={correction.itemId}>
+        {items.map((item) => (
+          <Carousel.Item key={item.id}>
             <Form.Select
               value={selectedStudent}
               onChange={handleSelectStudent}
               aria-label="Choose student"
             >
               <option value="">Choose student</option>
-              {students
-                .filter((student) => !selectedStudentIds.has(student.id))
-                .map((student) => (
-                  <option key={student.id} value={student.name}>
-                    {student.name}
-                  </option>
-                ))}
+              {students.map((student) => (
+                <option key={student.id} value={student.name}>
+                  {student.name}
+                </option>
+              ))}
             </Form.Select>
             <ListGroup className="mt-3">
-              {correction.students.map((student) => (
+              {selectedStudents.map((student) => (
                 <ListGroup.Item key={student.id}>
                   {student.name}
                   <Button
@@ -149,18 +151,15 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
                 </ListGroup.Item>
               ))}
             </ListGroup>
-            {sections && correction.students.length > 0 && (
+            {sections && selectedStudents.length > 0 && (
               <div>
                 <SectionTableWithInput
                   labId={labId}
-                  activeId={activeIndex}
-                  correctionData={correctionData}
                   setCorrectionData={setCorrectionData}
                   sections={sections}
-                />
+                ></SectionTableWithInput>
                 <Form.Label>Assistant review</Form.Label>
                 <Form.Control
-                  value={assistantReview}
                   onChange={handleReviewChange}
                   as="textarea"
                   rows={8}

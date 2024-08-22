@@ -15,8 +15,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onCancel,
 }) => {
   return (
-    <Modal show={show} onHide={onCancel} centered>
-      <Modal.Header closeButton>
+    <Modal
+      show={show}
+      onHide={() => {
+        return;
+      }}
+      centered
+    >
+      <Modal.Header>
         <Modal.Title>Confirm</Modal.Title>
       </Modal.Header>
       <Modal.Body>{text}</Modal.Body>

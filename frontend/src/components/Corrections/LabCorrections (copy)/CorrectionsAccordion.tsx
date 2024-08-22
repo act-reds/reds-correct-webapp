@@ -11,7 +11,9 @@ const CorrectionsAccordion: React.FC<CorrectionsAccordionProps> = ({
 }) => {
   return (
     <div>
+      <h3>Dynamic Rectangles Example</h3>
       <DynamicRectangles labId={labId} />
+      {/* Other content goes here */}
     </div>
   );
 };

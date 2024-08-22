@@ -1,59 +1,61 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Card, Button, Modal } from "react-bootstrap";
+import "./DynamicRectangles.css";
 import CorrectionCarousel from "./CorrectionCarousel";
 import { CorrectionData } from "../../../../types/CorrectionTypes";
-import "./DynamicRectangles.css";
 import ConfirmationModal from "@/components/ConfirmationModal";
 
+interface Item {
+  id: number;
+}
+
 const DynamicRectangles: React.FC<{ labId: number }> = ({ labId }) => {
+  const [items, setItems] = useState<Item[]>([]);
   const [nextId, setNextId] = useState<number>(0);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [itemToRemove, setItemToRemove] = useState<number | null>(null);
-  const [correctionData, setCorrectionData] = useState<CorrectionData[]>([]);
+  const [itemToRemove, setItemToRemove] = useState<number | null>(null); // Track the item to remove
 
+  // Ref to track if the modal is being closed intentionally by the user
   const isModalClosing = useRef(false);
 
+  const [correctionData, setCorrectionData] = useState<CorrectionData>({
+    labId: labId,
+    appreciation: "",
+    students: [],
+    subsectionMarks: [],
+  });
+
   const addItem = () => {
-    setCorrectionData((prev) => [
-      ...prev,
-      {
-        itemId: nextId,
-        labId: labId,
-        appreciation: "",
-        students: [],
-        subsectionMarks: [],
-      },
-    ]);
-
+    setItems((prevItems) => [...prevItems, { id: nextId }]);
     setNextId((prevId) => prevId + 1);
-    setActiveIndex(correctionData.length);
+    setActiveIndex(items.length);
     setShowModal(true);
-  };
-
-  const removeItem = (id: number) => {
-    if (id !== null) {
-      setCorrectionData((prev) => prev.filter((item) => item.itemId !== id));
-      setActiveIndex((prev) => Math.max(prev - 1, 0));
-    }
   };
 
   const confirmRemoveItem = (id: number) => {
     setItemToRemove(id);
-    setShowConfirmation(true);
-  };
-
-  const doNotRemoveItem = () => {
-    setShowConfirmation(false);
-    setShowModal(true);
+    setShowConfirmation(true); // Show confirmation modal
   };
 
   const handleRemoveConfirmed = () => {
     if (itemToRemove !== null) {
       removeItem(itemToRemove);
     }
-    setShowConfirmation(false);
+    setShowConfirmation(false); // Close the confirmation modal
+  };
+
+  const handleRemoveCanceled = () => {
+    setItemToRemove(null); // Clear the item to remove
+    setShowConfirmation(false); // Close the confirmation modal
+  };
+
+  const removeItem = (id: number) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    if (activeIndex >= items.length - 1) {
+      setActiveIndex((prev) => Math.max(items.length - 2, 0));
+    }
   };
 
   const handleShowModal = (index: number) => {
@@ -62,71 +64,72 @@ const DynamicRectangles: React.FC<{ labId: number }> = ({ labId }) => {
   };
 
   const handleCloseModal = () => {
-    setShowModal(false);
-    isModalClosing.current = false;
-    if (correctionData[activeIndex].students.length <= 0) {
-      confirmRemoveItem(correctionData[activeIndex].itemId);
+    isModalClosing.current = true; // Mark that the modal is closing
+    if (correctionData.students.length <= 0) {
+      removeItem(items[activeIndex]?.id);
+      setShowConfirmation(false);
+      setShowModal(false);
+    } else {
+      setShowModal(false);
     }
+    isModalClosing.current = false; // Mark that the modal is closing
   };
 
   const handleButtonClick = (id: number) => {
     console.log("Button clicked for item ID:", id);
   };
 
-  const saveCorrectionData = () => {};
+  useEffect(() => {
+    console.log("correctionData -> ", correctionData);
+  }, [correctionData]);
 
-  //   useEffect(() => {
-  //     console.log("data", correctionData);
-  //   }, [correctionData]);
+  const saveCorrectionData = () => {
+    if (correctionData.students.length <= 0) {
+      return false;
+    }
+    return true;
+  };
 
   return (
-    <>
+    <div>
       <div className="d-flex flex-wrap">
         <Card className="add-button-card" onClick={addItem}>
           +
         </Card>
-        {correctionData.map((correction, index) => (
+
+        {items.map((item) => (
           <Card
-            key={correction.itemId}
+            key={item.id}
             className="existing-rectangle-card"
-            onClick={() => handleShowModal(index)}
+            onClick={() => handleShowModal(items.indexOf(item))}
           >
-            <div className="student-names">
-              {correction.students.map((student) => {
-                return (
-                  <div className="student-name-item" key={student.id}>
-                    <p>{student.name}</p>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="result">5</div>
+            <div>{item.id}</div>
             <Button
               variant="danger"
               className="remove-button"
               onClick={(e) => {
                 e.stopPropagation();
-                confirmRemoveItem(correction.itemId);
+                confirmRemoveItem(item.id); // Trigger confirmation modal instead of directly removing
               }}
             >
-              x
+              Remove
             </Button>
           </Card>
         ))}
       </div>
-
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Correction</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <CorrectionCarousel
-            correctionData={correctionData}
+            items={items}
             activeIndex={activeIndex}
             onSelect={(selectedIndex) => setActiveIndex(selectedIndex)}
             onButtonClick={handleButtonClick}
             labId={labId}
             handleSlide={() => {
+              // Only handle slide if modal is not closing
               if (!isModalClosing.current) {
                 saveCorrectionData();
               }
@@ -141,13 +144,14 @@ const DynamicRectangles: React.FC<{ labId: number }> = ({ labId }) => {
         </Modal.Footer>
       </Modal>
 
+      {/* Confirmation Modal */}
       <ConfirmationModal
         show={showConfirmation}
         text="Do you really want to delete this correction and lose all the data?"
         onConfirm={handleRemoveConfirmed}
-        onCancel={doNotRemoveItem}
+        onCancel={handleRemoveCanceled}
       />
-    </>
+    </div>
   );
 };
 
