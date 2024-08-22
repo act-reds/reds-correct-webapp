@@ -15,7 +15,7 @@ const DynamicRectangles: React.FC<{ labId: number }> = ({ labId }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [itemToRemove, setItemToRemove] = useState<number | null>(null);
+  const [itemToRemove, setItemToRemove] = useState<number | null>(null); // Track the item to remove
 
   // Ref to track if the modal is being closed intentionally by the user
   const isModalClosing = useRef(false);
@@ -34,6 +34,23 @@ const DynamicRectangles: React.FC<{ labId: number }> = ({ labId }) => {
     setShowModal(true);
   };
 
+  const confirmRemoveItem = (id: number) => {
+    setItemToRemove(id);
+    setShowConfirmation(true); // Show confirmation modal
+  };
+
+  const handleRemoveConfirmed = () => {
+    if (itemToRemove !== null) {
+      removeItem(itemToRemove);
+    }
+    setShowConfirmation(false); // Close the confirmation modal
+  };
+
+  const handleRemoveCanceled = () => {
+    setItemToRemove(null); // Clear the item to remove
+    setShowConfirmation(false); // Close the confirmation modal
+  };
+
   const removeItem = (id: number) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));
     if (activeIndex >= items.length - 1) {
@@ -48,36 +65,26 @@ const DynamicRectangles: React.FC<{ labId: number }> = ({ labId }) => {
 
   const handleCloseModal = () => {
     isModalClosing.current = true; // Mark that the modal is closing
-    const ret = saveCorrectionData();
-    if (!ret) {
-      setItemToRemove(items[activeIndex]?.id ?? null);
-      setShowConfirmation(true);
+    if (correctionData.students.length <= 0) {
+      removeItem(items[activeIndex]?.id);
+      setShowConfirmation(false);
+      setShowModal(false);
     } else {
       setShowModal(false);
     }
     isModalClosing.current = false; // Mark that the modal is closing
   };
 
-  const handleConfirmClose = () => {
-    if (itemToRemove !== null) {
-      removeItem(itemToRemove);
-    }
-    setShowConfirmation(false);
-    setShowModal(false);
-  };
-
-  const handleCancelClose = () => {
-    setShowConfirmation(false);
-    setShowModal(false);
-  };
-
   const handleButtonClick = (id: number) => {
     console.log("Button clicked for item ID:", id);
   };
 
+  useEffect(() => {
+    console.log("correctionData -> ", correctionData);
+  }, [correctionData]);
+
   const saveCorrectionData = () => {
     if (correctionData.students.length <= 0) {
-      alert("You can't save a correction if there are no students selected.");
       return false;
     }
     return true;
@@ -102,7 +109,7 @@ const DynamicRectangles: React.FC<{ labId: number }> = ({ labId }) => {
               className="remove-button"
               onClick={(e) => {
                 e.stopPropagation();
-                removeItem(item.id);
+                confirmRemoveItem(item.id); // Trigger confirmation modal instead of directly removing
               }}
             >
               Remove
@@ -137,11 +144,12 @@ const DynamicRectangles: React.FC<{ labId: number }> = ({ labId }) => {
         </Modal.Footer>
       </Modal>
 
+      {/* Confirmation Modal */}
       <ConfirmationModal
         show={showConfirmation}
-        text="Do you really want to close the current correction and lose all the data?"
-        onConfirm={handleConfirmClose}
-        onCancel={handleCancelClose}
+        text="Do you really want to delete this correction and lose all the data?"
+        onConfirm={handleRemoveConfirmed}
+        onCancel={handleRemoveCanceled}
       />
     </div>
   );

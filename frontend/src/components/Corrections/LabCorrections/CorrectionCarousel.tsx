@@ -33,6 +33,7 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
   const [selectedStudents, setSelectedStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<string>("");
   const [sections, setSections] = useState<any[]>([]);
+  const [assistantReview, setAssistantReview] = useState<string>("");
 
   // Fetch student data on component mount
   useEffect(() => {
@@ -90,10 +91,7 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
       }
     }
   };
-  const testHandleSlide = () => {
-    console.log("Is it the issue ? ");
-    handleSlide();
-  };
+
   // Handle student removal
   const handleRemoveStudent = (id: number) => {
     setSelectedStudents(
@@ -101,12 +99,19 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
     );
   };
 
+  const handleReviewChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setAssistantReview(event.target.value);
+  };
+
   useEffect(() => {
     setCorrectionData((prev: CorrectionData) => ({
       ...prev,
       students: selectedStudents,
+      appreciation: assistantReview,
     }));
-  }, [selectedStudents]);
+  }, [selectedStudents, assistantReview]);
 
   return (
     <div>
@@ -154,7 +159,11 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
                   sections={sections}
                 ></SectionTableWithInput>
                 <Form.Label>Assistant review</Form.Label>
-                <Form.Control as="textarea" rows={8} />
+                <Form.Control
+                  onChange={handleReviewChange}
+                  as="textarea"
+                  rows={8}
+                />
               </div>
             )}
           </Carousel.Item>

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Table, Container, Form, Modal, Button } from "react-bootstrap";
-import { CorrectionData, Student } from "../../../types/CorrectionTypes";
+import { Table, Container, Form } from "react-bootstrap";
+import {
+  CorrectionData,
+  Section,
+  SubsectionMark,
+} from "../../../types/CorrectionTypes";
 
 interface SectionTableWithInputProps {
   labId: number;
@@ -14,7 +18,33 @@ const SectionTableWithInput: React.FC<SectionTableWithInputProps> = ({
   setCorrectionData,
 }) => {
   const [inputValues, setInputValues] = useState({});
-  const [selectedStudents, setSelectedStudents] = useState<Student[]>([]);
+  const [subsectionMarks, setSubsectionMarks] = useState<SubsectionMark[]>([]);
+
+  // Initialize subsectionMarks when sections change
+  useEffect(() => {
+    console.log("OSKOUUUUUUUUUUR");
+    const initializeSubsectionMarks = () => {
+      const marks: SubsectionMark[] = [];
+      sections.forEach((section: Section) => {
+        section.subsections.forEach((subsection: any) => {
+          marks.push({ subsectionId: subsection.id, result: 0 });
+        });
+      });
+      setSubsectionMarks(marks);
+    };
+
+    if (sections.length > 0) {
+      initializeSubsectionMarks();
+    }
+  }, [sections]); // Runs only when sections change
+
+  useEffect(() => {
+    // Optionally update the parent correction data state
+    setCorrectionData((prev) => ({
+      ...prev,
+      subsectionMarks,
+    }));
+  }, [subsectionMarks]);
 
   // Handle input change with validation
   const handleInputChange = (subsectionId, value) => {
@@ -30,7 +60,15 @@ const SectionTableWithInput: React.FC<SectionTableWithInputProps> = ({
       ...inputValues,
       [subsectionId]: numericValue,
     });
-    // setCorrectionData;
+
+    // Update the subsectionMarks state
+    setSubsectionMarks((prevMarks) =>
+      prevMarks.map((mark) =>
+        mark.subsectionId === subsectionId
+          ? { ...mark, result: numericValue }
+          : mark
+      )
+    );
   };
 
   // Calculate section result
