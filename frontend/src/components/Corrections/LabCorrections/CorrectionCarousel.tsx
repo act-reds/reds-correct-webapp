@@ -2,16 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Carousel, Button, Form, ListGroup } from "react-bootstrap";
 import SectionTableWithInput from "@/components/Grid/SectionTableWithInput";
 import SectionTable from "@/components/Grid/SectionTable";
-import { CorrectionData, Student } from "../../../../types/CorrectionTypes";
+import { CorrectionData, Section, Student } from "../../../../types/CorrectionTypes";
 import "./DynamicRectangles.css";
 
 interface CorrectionCarouselProps {
   correctionData: CorrectionData[];
   activeIndex: number;
   onSelect: (selectedIndex: number) => void;
-  onButtonClick: (id: number) => void;
   labId: number;
-  handleSlide: () => void;
+  sections: Section[];
+  students: Student[];
   setCorrectionData: React.Dispatch<React.SetStateAction<CorrectionData[]>>;
 }
 
@@ -19,44 +19,18 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
   correctionData,
   activeIndex,
   onSelect,
-  onButtonClick,
   labId,
-  handleSlide,
+  sections,
+  students, 
   setCorrectionData,
 }) => {
-  const [data, setData] = useState<any>({});
-  const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<Student[]>(
     correctionData[activeIndex].students
   );
   const [selectedStudent, setSelectedStudent] = useState<string>("");
-  const [sections, setSections] = useState<any[]>([]);
   const [assistantReview, setAssistantReview] = useState<string>(
     correctionData[activeIndex].appreciation
   );
-
-  useEffect(() => {
-    const fetchStudentData = async () => {
-      try {
-        const response = await fetch(
-          `/api/data/lab/${labId}/get-correction-data`
-        );
-        if (!response.ok) throw new Error("Failed to fetch data");
-        const tmpData = await response.json();
-        setData(tmpData);
-        setSections(tmpData.gridData);
-        setStudents(
-          tmpData.classStudents.map((student: any) => ({
-            id: student.id,
-            name: student.name,
-          }))
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchStudentData();
-  }, [labId]);
 
   const getSelectedStudentIds = () => {
     const allSelectedIds = correctionData
@@ -69,7 +43,7 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
   const handleSelectStudent = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedName = event.target.value;
     if (selectedName) {
-      const student = data.classStudents.find(
+      const student = students.find(
         (stu: any) => stu.name === selectedName
       );
       if (student && !selectedStudents.some((s) => s.id === student.id)) {
@@ -149,14 +123,14 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
                 </ListGroup.Item>
               ))}
             </ListGroup>
-            {sections && correction.students.length > 0 && (
+            {correction.sections && correction.students.length > 0 && (
               <div>
                 <SectionTableWithInput
                   labId={labId}
                   activeId={activeIndex}
                   correctionData={correctionData}
                   setCorrectionData={setCorrectionData}
-                  sections={sections}
+                  correction={correction}
                 />
                 <Form.Label>Assistant review</Form.Label>
                 <Form.Control

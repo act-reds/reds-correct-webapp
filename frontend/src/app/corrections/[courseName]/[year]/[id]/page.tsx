@@ -27,7 +27,6 @@ const CoursePage: React.FC = () => {
 
   const courseId = parseInt(params.id as string, 10);
 
-  // Handle class selection and redirection
   const handleClassSelect = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -39,13 +38,11 @@ const CoursePage: React.FC = () => {
     }
 
     const classData = await getClass(parseInt(selectedClassId, 10));
-    // Route to the desired page
     router.push(
       `/corrections/${params.courseName}/${params.year}/${params.id}/${classData.name}/${selectedClassId}`
     );
   };
 
-  // Handle form submission for adding class and students
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (students.length === 0 || !newClassName) {
@@ -53,10 +50,8 @@ const CoursePage: React.FC = () => {
       return;
     }
 
-    // Log the students data to the console
     console.log("Students data to be sent:", students);
     try {
-      // Add students if they are not already
       await addStudents(students);
 
       const exists = await createClass(newClassName, courseId);
@@ -69,9 +64,7 @@ const CoursePage: React.FC = () => {
       const classId = await getClassId(newClassName, courseId);
       console.log("ClassId = classId");
 
-      // Extract emails from students array
       const emails = students.map((student) => student.mail);
-      // Get the students ids to add the students to the class
       const { studentIds } = await fetchStudentIdsByEmails(emails);
 
       await addStudentsToClass(classId, studentIds);
@@ -137,7 +130,7 @@ const CoursePage: React.FC = () => {
                   <Form.Control
                     type="file"
                     accept=".xlsx"
-                    onChange={(event) =>
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                       handleFileUpload(event, setFileData, setStudents)
                     }
                   />
@@ -147,7 +140,6 @@ const CoursePage: React.FC = () => {
                 Add
               </Button>
             </Form>
-            {/* Display parsed file data in a table */}
             {fileData.length > 0 && (
               <Table striped bordered hover className="mt-3">
                 <thead>

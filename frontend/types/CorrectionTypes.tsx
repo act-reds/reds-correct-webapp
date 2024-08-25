@@ -4,6 +4,7 @@ export interface Subsection {
   name: string;
   weight: number;
   criterion: string;
+  result?: number;
 }
 
 export interface Section {
@@ -28,17 +29,13 @@ export interface Student {
   mail?: string | null;
 }
 
-export interface SubsectionMark {
-  subsectionId: number;
-  result: number;
-}
-
 export interface CorrectionData {
+  id?: number;
   itemId: number;
   labId: number;
   appreciation: string;
   students: Student[];
-  subsectionMarks: SubsectionMark[];
+  sections: Section[];
 }
 
 export interface SubsectionInfo {
@@ -53,4 +50,10 @@ export interface SectionInfo {
   name: string;
   weight: number;
   subsections: SubsectionInfo[];
+}
+
+export interface Correction {
+  id: number;
+  appreciation: string;
+  students: Student[];
 }

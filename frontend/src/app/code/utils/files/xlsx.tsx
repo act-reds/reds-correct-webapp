@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import * as XLSX from "xlsx";
 
 // Define the type for the students state
@@ -12,11 +13,12 @@ interface Student {
 type FileData = any[][];
 
 // Define the handler function
-export function handleFileUpload(
-  event: React.ChangeEvent<HTMLInputElement>,
-  setFileData: React.Dispatch<React.SetStateAction<FileData>>,
-  setStudents: React.Dispatch<React.SetStateAction<Student[]>>
-) {
+export const handleFileUpload = (
+  event: React.ChangeEvent<HTMLInputElement>, // Ensure this is HTMLInputElement
+  setFileData: Dispatch<SetStateAction<any[][]>>,
+  setStudents: Dispatch<SetStateAction<any[]>>
+) => {
+  console.log("TEST");
   const file = event.target.files?.[0];
   if (file) {
     const reader = new FileReader();
