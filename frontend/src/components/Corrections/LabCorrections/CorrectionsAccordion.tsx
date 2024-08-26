@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Spinner, Alert } from "react-bootstrap";
 import DynamicRectangles from "./DynamicRectangle"; // Adjust import based on your file structure
-import { Section, Student, CorrectionData, Correction } from "../../../../types/CorrectionTypes";
+import {
+  Section,
+  Student,
+  CorrectionData,
+  Correction,
+} from "../../../../types/CorrectionTypes";
+import { getCorrectionDataFromLab } from "@/app/lib/data/correction";
 
 interface CorrectionsAccordionProps {
   labId: number;
 }
 
-const CorrectionsAccordion: React.FC<CorrectionsAccordionProps> = ({ labId }) => {
+const CorrectionsAccordion: React.FC<CorrectionsAccordionProps> = ({
+  labId,
+}) => {
   const [sections, setSections] = useState<Section[] | null>(null); // State to store sections
   const [loading, setLoading] = useState<boolean>(true); // State to manage loading
   const [error, setError] = useState<string | null>(null); // State to manage errors
@@ -20,7 +28,9 @@ const CorrectionsAccordion: React.FC<CorrectionsAccordionProps> = ({ labId }) =>
     const fetchData = async () => {
       try {
         // Fetch sections data
-        const sectionResponse = await fetch(`/api/data/lab/${labId}/get-correction-data`);
+        const sectionResponse = await fetch(
+          `/api/data/lab/${labId}/get-correction-data`
+        );
         if (!sectionResponse.ok) {
           throw new Error("Failed to fetch sections data");
         }
@@ -33,29 +43,9 @@ const CorrectionsAccordion: React.FC<CorrectionsAccordionProps> = ({ labId }) =>
           }))
         );
 
-        // Fetch corrections data
-        const correctionResponse = await fetch(`/api/data/lab/${labId}/get-correction-from-lab`);
-        if (!correctionResponse.ok) {
-          throw new Error("Failed to fetch corrections data");
-        }
-        const correctionTmp = await correctionResponse.json();
-        // console.log("This is the correcton array -> ", correctionTmp);
-        setCorrections(correctionTmp.corrections); 
-        console.log("ETUDIANTS -> ", correctionTmp);
-        // Now map the data to create CorrectionData
-        const mappedCorrectionData: CorrectionData[] = correctionTmp.corrections.map(
-          (correction: Correction) => ({
-            id: correction.id,
-            itemId: correction.id, // Assuming itemId is the same as correction.id
-            labId: labId,
-            appreciation: correction.appreciation,
-            students: correction.students, // Assign all students to each correction (adjust as necessary)
-            sections: sectionData.gridData, // Assign sections to each correction
-          })
-        );
-
-        setCorrectionData(mappedCorrectionData); // Set the mapped CorrectionData
-
+        const correctionTmp = await getCorrectionDataFromLab(labId);
+        setCorrections(correctionTmp.corrections);
+        setCorrectionData(correctionTmp.corrections); // Set the mapped CorrectionData
       } catch (err) {
         setError(err.message || "An error occurred"); // Handle error
       } finally {
@@ -67,7 +57,11 @@ const CorrectionsAccordion: React.FC<CorrectionsAccordionProps> = ({ labId }) =>
   }, [labId]); // Dependency array to trigger the fetch when labId changes
 
   if (loading) {
-    return <Spinner animation="border" role="status"><span className="visually-hidden">Loading...</span></Spinner>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    );
   }
 
   if (error) {
@@ -77,10 +71,10 @@ const CorrectionsAccordion: React.FC<CorrectionsAccordionProps> = ({ labId }) =>
   return (
     <div>
       {sections && sections.length > 0 ? (
-        <DynamicRectangles 
-          labId={labId} 
-          sections={sections} 
-          students={students} 
+        <DynamicRectangles
+          labId={labId}
+          sections={sections}
+          students={students}
           corrections={corrections} // Pass corrections to the DynamicRectangles component
           correctionData={correctionData}
           setCorrectionData={setCorrectionData}

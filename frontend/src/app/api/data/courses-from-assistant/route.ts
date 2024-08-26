@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       include: {
         courses: {
           include: {
-            course: true, // Fetch the course details
+            course: true, 
           },
         },
       },

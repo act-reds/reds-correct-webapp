@@ -3,7 +3,7 @@
 export async function createCourse(
   name: string,
   year: number,
-  assistantEmail: string
+  assistantEmails: string[] // Accept an array of emails
 ) {
   try {
     const response = await fetch("/api/data/courses", {
@@ -14,7 +14,7 @@ export async function createCourse(
       body: JSON.stringify({
         name,
         year,
-        assistantEmail,
+        assistantEmails, // Send the array of emails
       }),
     });
 

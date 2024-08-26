@@ -6,7 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "bootstrap/dist/css/bootstrap.css";
-import "./globals.css";
+import "../styles/global.css";
 
 interface RootLayoutProps {
   children: ReactNode;

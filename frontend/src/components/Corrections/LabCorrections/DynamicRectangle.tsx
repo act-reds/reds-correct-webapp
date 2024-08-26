@@ -23,7 +23,14 @@ const DynamicRectangles: React.FC<{
   corrections: Correction[];
   correctionData: CorrectionData[];
   setCorrectionData: React.Dispatch<React.SetStateAction<CorrectionData[]>>;
-}> = ({ labId, sections, students, corrections, correctionData, setCorrectionData }) => {
+}> = ({
+  labId,
+  sections,
+  students,
+  corrections,
+  correctionData,
+  setCorrectionData,
+}) => {
   const [nextId, setNextId] = useState<number>(0);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
@@ -50,17 +57,24 @@ const DynamicRectangles: React.FC<{
         sections: tmpSections,
       },
     ]);
-
+    console.log("tmpSections ? ", tmpSections);
     setNextId((prevId) => prevId + 1);
     setActiveIndex(correctionData.length);
     setShowModal(true);
   };
 
   const removeItem = (id: number) => {
-      deleteCorrection(id);
-
-      setCorrectionData((prev) => prev.filter((item) => item.itemId !== id));
-      setActiveIndex((prev) => Math.max(prev - 1, 0));
+    console.log("HERE", correctionData);
+    console.log("What am I removing ? -> ", id);
+    const correctionTarget = correctionData.find((item) => item.itemId === id);
+    if (correctionTarget) {
+      const targetId = correctionData.find((item) => item.itemId === id).id;
+      if (targetId) {
+        deleteCorrection(targetId);
+      }
+    }
+    setCorrectionData((prev) => prev.filter((item) => item.itemId !== id));
+    setActiveIndex((prev) => Math.max(prev - 1, 0));
   };
 
   const confirmRemoveItem = (id: number) => {
@@ -86,7 +100,10 @@ const DynamicRectangles: React.FC<{
     setShowModal(true);
   };
 
-  const saveCorrectionToAPI = async (correction: CorrectionData, index: number) => {
+  const saveCorrectionToAPI = async (
+    correction: CorrectionData,
+    index: number
+  ) => {
     try {
       const response = await fetch(
         "/api/data/correction/create-update-correction",
@@ -132,7 +149,6 @@ const DynamicRectangles: React.FC<{
   };
 
   const saveCorrectionData = () => {};
-  console.log("MAMAMAMA ->", correctionData);
   return (
     <>
       <div className="d-flex flex-wrap">

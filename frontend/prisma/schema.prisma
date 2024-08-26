@@ -84,6 +84,7 @@ model ClassStudent {
 model Lab {
   id         Int          @id @default(autoincrement())
   name       String
+  readyToSend Boolean     @default(false)
   classId    Int
   class      Class        @relation("LabClass", fields: [classId], references: [id])
   grid       Grid?        @relation("LabGrid", fields: [gridId], references: [id], onDelete: SetNull) // Named relation

@@ -18,39 +18,54 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { name, year, assistantEmail } = await request.json() as {
+    const { name, year, assistantEmails } = await request.json() as {
       name: string;
       year: number;
-      assistantEmail: string;
+      assistantEmails: string[]; // Array of assistant emails
     };
 
-    // Find the assistant by email
-    const assistant: Assistant | null = await prisma.assistant.findUnique({
-      where: { mail: assistantEmail },
-    });
-
-    if (!assistant) {
-      return NextResponse.json({ error: 'Assistant not found' }, { status: 404 });
+    if (!name || !year || !Array.isArray(assistantEmails) || assistantEmails.length === 0) {
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
-    // Create the course and associate the assistant
-    const newCourse: Course = await prisma.course.create({
+    // Create the course
+    const newCourse = await prisma.course.create({
       data: {
         name,
         year,
       },
     });
 
-    // Link the new course to the assistant in the CourseAssistant table
-    await prisma.courseAssistant.create({
-      data: {
-        courseId: newCourse.id,
-        assistantId: assistant.id,
+    // Find all assistants with the given emails
+    const assistants = await prisma.assistant.findMany({
+      where: {
+        mail: {
+          in: assistantEmails,
+        },
       },
+    });
+
+    // Check if all provided emails exist in the database
+    const assistantEmailsSet = new Set(assistantEmails);
+    const foundEmails = new Set(assistants.map(assistant => assistant.mail));
+    const missingEmails = [...assistantEmailsSet].filter(email => !foundEmails.has(email));
+
+    if (missingEmails.length > 0) {
+      return NextResponse.json({ error: `The following assistants do not exist: ${missingEmails.join(', ')}` }, { status: 404 });
+    }
+
+    // Link the existing assistants to the new course
+    const assistantIds = assistants.map(assistant => assistant.id);
+    await prisma.courseAssistant.createMany({
+      data: assistantIds.map(id => ({
+        courseId: newCourse.id,
+        assistantId: id,
+      })),
     });
 
     return NextResponse.json(newCourse);
   } catch (error) {
+    console.error(error); // Log the error for debugging
     return NextResponse.json({ error: 'Failed to create course' }, { status: 500 });
   }
 }

@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Table, Container, Form } from "react-bootstrap";
+import { CorrectionData } from "../../../types/CorrectionTypes";
 import {
-  CorrectionData,
-  Section,
-  SubsectionMark,
-  SectionInfo,
-  SubsectionInfo,
-} from "../../../types/CorrectionTypes";
-import { calculateSectionResult, calculateTotalResult } from "@/app/lib/corrections/marks";
+  calculateSectionResult,
+  calculateTotalResult,
+} from "@/app/lib/corrections/marks";
 
 interface SectionTableWithInputProps {
   labId: number;
@@ -25,36 +22,42 @@ const SectionTableWithInput: React.FC<SectionTableWithInputProps> = ({
   setCorrectionData,
 }) => {
   const handleInputChange = (subsectionId: number, value: string) => {
+    console.log(
+      "Handling input change for subsectionId:",
+      subsectionId,
+      "with value:",
+      value
+    );
     let numericValue = parseFloat(value);
-    // Ensure the value is clamped between 0 and 1
-  if (isNaN(numericValue)) {
-    numericValue = 0;
-  } else if (numericValue < 0) {
-    numericValue = 0;
-  } else if (numericValue > 1) {
-    numericValue = 1;
-  }
-    // Update the correctionData state by finding the specific subsection
-    setCorrectionData((prevData) =>
-      prevData.map((data) => {
+
+    if (isNaN(numericValue)) {
+      numericValue = 0;
+    } else if (numericValue < 0) {
+      numericValue = 0;
+    } else if (numericValue > 1) {
+      numericValue = 1;
+    }
+
+    setCorrectionData((prevData) => {
+      // Begin transforming the data
+      const newData = prevData.map((data) => {
         if (data.itemId === activeId) {
-          return {
-            ...data,
-            sections: data.sections.map((section) => ({
-              ...section,
-              subsections: section.subsections.map((subsection) =>
-                subsection.id === subsectionId
-                  ? { ...subsection, result: numericValue }
-                  : subsection
-              ),
-            })),
-          };
+          const updatedSections = data.sections.map((section) => {
+            const updatedSubsections = section.subsections.map((subsection) => {
+              if (subsection.id === subsectionId) {
+                return { ...subsection, result: numericValue };
+              }
+              return subsection;
+            });
+            return { ...section, subsections: updatedSubsections };
+          });
+          return { ...data, sections: updatedSections };
         }
         return data;
-      })
-    );
+      });
+      return newData;
+    });
   };
-
 
   return (
     <Container fluid className="mt-3">
@@ -108,7 +111,9 @@ const SectionTableWithInput: React.FC<SectionTableWithInputProps> = ({
         <thead>
           <tr>
             <th colSpan={4}>Result</th>
-            <th className="text-end fw-bold">{calculateTotalResult(correctionData[activeId].sections)}</th>
+            <th className="text-end fw-bold">
+              {calculateTotalResult(correctionData[activeId].sections)}
+            </th>
           </tr>
         </thead>
       </Table>

@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-light text-center py-3 footer">
       <Container>
-        <p className="mb-0">© 2024 My Next.js Project</p>
+        <p className="mb-0">© REDS - Reds correct tool 2024</p>
       </Container>
     </footer>
   );

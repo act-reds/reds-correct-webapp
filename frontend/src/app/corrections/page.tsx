@@ -5,11 +5,12 @@ import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import InputGroup from "react-bootstrap/InputGroup";
 import { useRouter } from "next/navigation";
-import { fetchCourses } from "../lib/data/getCourses";
 import { getCourseFromId, getCoursesForAssistant } from "../lib/data/courses";
 import { createCourse } from "../lib/data/addNewCourse";
+import QuickSelectLab from "@/components/Corrections/QuickSelectLab";
+import { Assistant } from "../../../types/CorrectionTypes";
+import SelectAssistants from "@/components/Corrections/SelectAssistants";
 
 const CorrectionsPage: React.FC = () => {
   const { data: session } = useSession();
@@ -19,44 +20,95 @@ const CorrectionsPage: React.FC = () => {
   const [activeAccordionKey, setActiveAccordionKey] = useState<string | null>(
     "0"
   );
+  const [courses, setCourses] = useState<any[]>([]);
+  const [assistants, setAssistants] = useState<Assistant[]>([]);
+  const [selectedAssistants, setSelectedAssistants] = useState<Assistant[]>([]);
+  const [searchAssistants, setSearchAssistants] = useState<Assistant[]>([]);
+
   let email: string = "";
 
   if (session?.user?.email) {
     email = session?.user?.email;
   }
 
-  const [courses, setCourses] = useState<any[]>([]);
+  useEffect(() => {
+    async function loadAssistants() {
+      try {
+        const response = await fetch("/api/data/assistants");
+        if (!response.ok) {
+          throw new Error("Failed to fetch assistants");
+        }
+        const data = await response.json();
+        setAssistants(data);
+        setSearchAssistants(data);
+      } catch (error) {
+        console.error("Error fetching assistants:", error);
+      }
+    }
 
-  const handleSubmitNewCourse = (e: React.FormEvent) => {
+    async function loadCourses() {
+      try {
+        const allCourses = await getCoursesForAssistant(session?.user?.email);
+        setCourses(allCourses);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+        setCourses([]);
+      }
+    }
+
+    if (session) {
+      loadCourses();
+      loadAssistants();
+    }
+  }, [session]);
+
+  const handleSubmitNewCourse = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const formData = new FormData(e.currentTarget);
     const year = formData.get("selectedYear") as string;
     const name = formData.get("courseName") as string;
-    // Log the course name to the console
-    console.log("Course Name:", name);
 
-    // Check if the course name is valid (you can add more validation here)
     if (name.trim() === "") {
       alert("Please enter a course name.");
       return;
     }
 
-    // Check if a year was selected
     if (year === "" || year === "Select year") {
       alert("Please select a year.");
       return;
     }
 
-    createCourse(name, parseInt(year, 10), email);
+    // Extract email addresses from selectedAssistants
+    let assistantEmails = [...selectedAssistants.map((a) => a.mail), email];
 
-    alert(`The course "${name} - ${year}" was successfully created.`);
-    setActiveAccordionKey("0");
+    const filterAssistantEmails = assistantEmails.filter(
+      (item, index) => assistantEmails.indexOf(item) === index
+    );
+
+    try {
+      const newCourse = await createCourse(
+        name,
+        parseInt(year, 10),
+        filterAssistantEmails
+      );
+      alert(`The course "${name} - ${year}" was successfully created.`);
+
+      // Add the new course to the existing list of courses
+      setCourses([...courses, newCourse]);
+
+      // Reset form fields and set accordion to the default state
+      setCourseName("");
+      setSelectedYear("");
+      setSelectedAssistants([]);
+      setActiveAccordionKey("0");
+    } catch (error) {
+      console.error("Error creating course:", error);
+      alert("Failed to create course.");
+    }
   };
 
   const handleSelectCourse = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const formData = new FormData(e.currentTarget);
     const id = parseInt(formData.get("selectedCourse") as string, 10);
 
@@ -66,9 +118,7 @@ const CorrectionsPage: React.FC = () => {
     }
 
     try {
-      // Assuming getCourseFromId is an async function that fetches the course details by ID
       const course = await getCourseFromId(id);
-
       if (!course) {
         alert("Course not found");
         return;
@@ -84,8 +134,22 @@ const CorrectionsPage: React.FC = () => {
       alert("An error occurred while retrieving the course. Please try again.");
     }
   };
+
   const handleAccordionClick = (eventKey: string | null) => {
     setActiveAccordionKey(eventKey);
+  };
+
+  const handleAssistantChange = (selectedOptions: any) => {
+    const newSelectedAssistants = selectedOptions
+      ? selectedOptions.map((option: any) => option.data)
+      : [];
+    setSelectedAssistants(newSelectedAssistants);
+    // Update the searchable assistants if necessary
+    setSearchAssistants(
+      assistants.filter(
+        (a) => !newSelectedAssistants.find((sa) => sa.id === a.id)
+      )
+    );
   };
 
   // Generate options for years between 2022 and 2050
@@ -98,38 +162,24 @@ const CorrectionsPage: React.FC = () => {
     );
   }
 
-  useEffect(() => {
-    async function loadCourses() {
-      try {
-        const allCourses = await getCoursesForAssistant(session?.user?.email); // Make sure to await the promise
-        setCourses(allCourses);
-        console.log(allCourses);
-      } catch (error) {
-        console.error("Error fetching courses:", error);
-        setCourses([]); // Fallback to an empty array in case of an error
-      }
-    }
-
-    if (session) {
-      loadCourses();
-    }
-  }, [session, courseName, activeAccordionKey]);
-
   return (
     <>
+      <QuickSelectLab assistantMail={session?.user?.email} />
       <Accordion activeKey={activeAccordionKey} onSelect={handleAccordionClick}>
         <Accordion.Item eventKey="0">
           <Accordion.Header>Select an existing course</Accordion.Header>
           <Accordion.Body>
             <Form onSubmit={handleSelectCourse}>
-              <Form.Select aria-label="Select course" name="selectedCourse">
-                <option>Select course</option>
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.name} ({course.year})
-                  </option>
-                ))}
-              </Form.Select>
+              <Form.Group className="mb-3" controlId="formClassSel">
+                <Form.Select aria-label="Select course" name="selectedCourse">
+                  <option>Select course</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name} ({course.year})
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
               <Button variant="primary" type="submit">
                 Next
               </Button>
@@ -160,6 +210,15 @@ const CorrectionsPage: React.FC = () => {
                   {yearOptions}
                 </Form.Select>
               </Form.Group>
+
+              <Form.Group className="mb-3">
+                <SelectAssistants
+                  assistants={searchAssistants}
+                  selectedAssistants={selectedAssistants}
+                  onChange={handleAssistantChange}
+                />
+              </Form.Group>
+
               <Button variant="primary" type="submit">
                 Add
               </Button>
@@ -167,6 +226,18 @@ const CorrectionsPage: React.FC = () => {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+
+      <style jsx>{`
+        .selected-assistant {
+          background-color: #f8f9fa;
+        }
+        .selected-assistant span {
+          flex: 1;
+        }
+        .selected-assistant button {
+          margin-left: auto;
+        }
+      `}</style>
     </>
   );
 };

@@ -38,7 +38,7 @@ const Header: React.FC = () => {
   const navLinks = session
     ? [
         { href: "/corrections", label: "Corrections" },
-        { href: "#manage", label: "Manage" },
+        { href: "/manage", label: "Manage" },
         { href: "/grids", label: "Grids" },
         { href: "#help", label: "Help" },
       ]
@@ -58,7 +58,7 @@ const Header: React.FC = () => {
     <>
       <Navbar sticky="top" bg="dark" data-bs-theme="dark">
         <Container>
-          <Navbar.Brand href="#home">REDS Correct</Navbar.Brand>
+          <Navbar.Brand href="/">REDS Correct</Navbar.Brand>
           <Nav className="me-auto">
             {navLinks.map((link, index) => (
               <Nav.Link key={index} href={link.href}>

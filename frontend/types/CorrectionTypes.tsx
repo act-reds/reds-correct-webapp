@@ -57,3 +57,14 @@ export interface Correction {
   appreciation: string;
   students: Student[];
 }
+
+export interface Assistant {
+  id: number;
+  mail: string;
+}
+
+export interface Course {
+  id: number;
+  name: string;
+  year: number;
+}

@@ -100,14 +100,16 @@ const CoursePage: React.FC = () => {
           <Accordion.Header>Existing classes</Accordion.Header>
           <Accordion.Body>
             <Form onSubmit={handleClassSelect}>
-              <Form.Select aria-label="Select class" name="selectedClass">
-                <option>Select class</option>
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </Form.Select>
+              <Form.Group className="mb-3" controlId="formCourseSel">
+                <Form.Select aria-label="Select class" name="selectedClass">
+                  <option>Select class</option>
+                  {classes.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
               <Button variant="primary" type="submit">
                 Next
               </Button>

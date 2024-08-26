@@ -97,14 +97,16 @@ const ClassDetailsPage: React.FC = () => {
           <Accordion.Header>Existing labs</Accordion.Header>
           <Accordion.Body>
             <Form onSubmit={handleSubmitSelectedLab}>
-              <Form.Select aria-label="Select Lab" name="selectedLab">
-                <option>Select lab</option>
-                {labs.map((lab) => (
-                  <option key={lab.id} value={lab.id}>
-                    {lab.name}
-                  </option>
-                ))}
-              </Form.Select>
+              <Form.Group className="mb-3" controlId="formLabSel">
+                <Form.Select aria-label="Select Lab" name="selectedLab">
+                  <option>Select lab</option>
+                  {labs.map((lab) => (
+                    <option key={lab.id} value={lab.id}>
+                      {lab.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
               <Button variant="primary" type="submit">
                 Next
               </Button>

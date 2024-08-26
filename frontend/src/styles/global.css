@@ -5,4 +5,68 @@
     /* Add any other styling you want for the hover effect */
   }
 
-  
+  /* global.css */
+body {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  background-color: #313147;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* global.css */
+
+/* Styling the accordion container */
+.accordion {
+  margin: 20px 0;
+  border-radius: 0px;
+}
+
+/* Styling the accordion header */
+.accordion-button {
+  background-color: #63788d;
+  font-size: 1.1rem;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: #004ea7;
+  border-color: #004ea7;
+  color: white;
+}
+
+/* Styling the accordion body */
+.accordion-body {
+  padding: 20px;
+  background-color: #b5b7c4;
+}
+
+
+
+/* Optional: Add a hover effect for better interaction */
+.accordion-button:hover {
+  background-color: #004ea7;
+  background-color: #004ea7;
+}
+
+
+/* Add more global styles as needed */
