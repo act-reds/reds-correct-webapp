@@ -63,8 +63,22 @@ export interface Assistant {
   mail: string;
 }
 
+export interface Lab {
+  id: number;
+  labName: string;
+  // Add any other fields related to the lab
+}
+
+export interface Class {
+  id: number;
+  className: string;
+  labs: Lab[]; // A class can have multiple labs
+}
+
 export interface Course {
   id: number;
   name: string;
   year: number;
+  classes: Class[]; // A course can have multiple classes
+  assistants: Assistant[];
 }

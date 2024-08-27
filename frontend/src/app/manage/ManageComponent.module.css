@@ -1,0 +1,29 @@
+
+  
+  .accordion {
+    margin-top: 20px;
+  }
+  
+  .courseItem {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+  
+  .courseHeader {
+    background-color: #f4f4f4;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .courseContent {
+    padding: 10px;
+    background-color: #fafafa;
+  }
+  
+
+  
+  

@@ -56,3 +56,41 @@ export async function getCourseFromId(courseId: number) {
     return null;
   }
 }
+
+export async function getFullCoursesForAssistant(assistant_email: string) {
+  try {
+    console.log(assistant_email);
+    // Step 1: Get the assistantId from the email
+    const assistantIdResponse = await fetch("/api/data/assistant/get-id", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: assistant_email }),
+    });
+
+    if (!assistantIdResponse.ok) {
+      const errorData = await assistantIdResponse.json();
+      throw new Error(errorData.error);
+    }
+
+    const assistantIdData = await assistantIdResponse.json();
+    const assistantId = assistantIdData.assistantId;
+
+    // Step 2: Use the assistantId to fetch courses, classes, labs, and assistants
+    const response = await fetch(
+      `/api/data/courses/get-courses-full-info?assistantId=${assistantId}`
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error);
+    }
+
+    const data = await response.json();
+    return data.courses; // This now includes courses with their classes, labs, and assistants
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    return [];
+  }
+}
