@@ -39,22 +39,28 @@ const SectionTableWithInput: React.FC<SectionTableWithInputProps> = ({
     }
 
     setCorrectionData((prevData) => {
-      // Begin transforming the data
-      const newData = prevData.map((data) => {
-        if (data.itemId === activeId) {
-          const updatedSections = data.sections.map((section) => {
-            const updatedSubsections = section.subsections.map((subsection) => {
-              if (subsection.id === subsectionId) {
-                return { ...subsection, result: numericValue };
-              }
-              return subsection;
-            });
-            return { ...section, subsections: updatedSubsections };
+      // Create a shallow copy of the previous data
+      const newData = [...prevData];
+
+      // Find the specific item using activeId (which is the index)
+      const activeCorrection = newData[activeId];
+
+      if (activeCorrection) {
+        // Update the sections and subsections of the active correction
+        const updatedSections = activeCorrection.sections.map((section) => {
+          const updatedSubsections = section.subsections.map((subsection) => {
+            if (subsection.id === subsectionId) {
+              return { ...subsection, result: numericValue };
+            }
+            return subsection;
           });
-          return { ...data, sections: updatedSections };
-        }
-        return data;
-      });
+          return { ...section, subsections: updatedSubsections };
+        });
+
+        // Update the active correction in the array
+        newData[activeId] = { ...activeCorrection, sections: updatedSections };
+      }
+
       return newData;
     });
   };

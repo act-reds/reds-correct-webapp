@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button, Navbar } from "react-bootstrap";
@@ -45,7 +43,10 @@ const Header: React.FC = () => {
     : [];
 
   const button = session ? (
-    <Button variant="secondary" onClick={() => signOut()}>
+    <Button
+      variant="secondary"
+      onClick={() => signOut({ callbackUrl: "/" })} // Redirect to "/" after logout
+    >
       Log out
     </Button>
   ) : (
@@ -79,3 +80,4 @@ const Header: React.FC = () => {
 };
 
 export default Header;
+``;

@@ -3,9 +3,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function PUT(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const courseId = searchParams.get('courseId');
+export async function PUT(req: Request, { params }: { params: { courseId: string } }) {
+    const courseId = parseInt(params.courseId);
   
   if (!courseId) {
     return NextResponse.json({ message: 'Course ID is required' }, { status: 400 });

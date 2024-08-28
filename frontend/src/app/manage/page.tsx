@@ -7,6 +7,7 @@ import { getFullCoursesForAssistant } from "../lib/data/courses";
 import Accordion from "react-bootstrap/Accordion";
 import FilterableSelect from "@/components/FilterableSelect"; // Import the FilterableSelect component
 import { Option } from "../../../types/GlobalTypes";
+import ModalPopup from "@/components/ModalPopup";
 
 const ManageComponent: React.FC = () => {
   const { data: session } = useSession();
@@ -14,9 +15,12 @@ const ManageComponent: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [allAssistants, setAllAssistants] = useState<Assistant[]>([]);
   const [activeKey, setActiveKey] = useState<string | null>(null); // Track the active course
+  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [modalMessage, setModalMessage] = useState(""); // State to store the modal message
 
   useEffect(() => {
     async function loadAssistants() {
+      console.log("je passe par la");
       try {
         const response = await fetch("/api/data/assistants");
         if (!response.ok) {
@@ -35,6 +39,8 @@ const ManageComponent: React.FC = () => {
           const tmpData: Course[] = await getFullCoursesForAssistant(
             assistantEmail
           );
+
+          tmpData.sort((a, b) => a.name.localeCompare(b.name));
           setCourses(tmpData);
         }
       } catch (error) {
@@ -49,7 +55,6 @@ const ManageComponent: React.FC = () => {
   }, [assistantEmail]);
 
   const handleSelectionChange = (courseId: number, selectedItems: Option[]) => {
-    console.log("Selected Items:", selectedItems); // Debugging
     setCourses((prevCourses) =>
       prevCourses.map((course) =>
         course.id === courseId
@@ -82,19 +87,52 @@ const ManageComponent: React.FC = () => {
     setActiveKey(key);
   };
 
-  const updateCourseAssistant = () => {
+  const updateCourseAssistant = async () => {
     if (activeKey !== null) {
       const courseId = parseInt(activeKey);
       const course = courses.find((c) => c.id === courseId);
+
       if (course) {
-        const selectedAssistants = getAssistantOptions(course);
-        console.log("Current Selection:", selectedAssistants);
+        console.log("Updating Assistants for Course:", courseId);
+
+        try {
+          // Make the API call to update the assistants
+          const response = await fetch(
+            `/api/data/courses/${courseId}/update-assistants`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                assistants: course.assistants,
+              }),
+            }
+          );
+
+          const result = await response.json();
+          if (response.ok) {
+            console.log("Assistants updated successfully:", result.message);
+
+            // Show the modal with success message
+            setModalMessage("The assistants of the course have been updated!");
+            setShowModal(true);
+          } else {
+            console.error("Failed to update assistants:", result.error);
+          }
+        } catch (error) {
+          console.error("Error updating assistants:", error);
+        }
       } else {
         console.error("Course not found:", courseId);
       }
     } else {
       console.error("No active key set.");
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
 
   return (
@@ -120,7 +158,6 @@ const ManageComponent: React.FC = () => {
                 placeHolder="Select assistant to add..."
               />
               <div className="mt-3 text-end">
-                {" "}
                 <button
                   className="btn btn-primary"
                   onClick={updateCourseAssistant}
@@ -132,6 +169,13 @@ const ManageComponent: React.FC = () => {
           </Accordion.Item>
         ))}
       </Accordion>
+
+      {/* Include the modal component here */}
+      <ModalPopup
+        show={showModal}
+        message={modalMessage}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };

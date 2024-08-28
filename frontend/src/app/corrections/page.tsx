@@ -164,7 +164,6 @@ const CorrectionsPage: React.FC = () => {
 
   return (
     <>
-      <QuickSelectLab assistantMail={session?.user?.email} />
       <Accordion activeKey={activeAccordionKey} onSelect={handleAccordionClick}>
         <Accordion.Item eventKey="0">
           <Accordion.Header>Select an existing course</Accordion.Header>
@@ -226,7 +225,9 @@ const CorrectionsPage: React.FC = () => {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-
+      {session?.user?.email && (
+        <QuickSelectLab assistantMail={session?.user?.email} />
+      )}
       <style jsx>{`
         .selected-assistant {
           background-color: #f8f9fa;

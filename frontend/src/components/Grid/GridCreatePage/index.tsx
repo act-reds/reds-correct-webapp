@@ -7,6 +7,8 @@ import SectionForm from "./SectionForm";
 import SubSectionForm from "./SubSectionForm";
 import { GridData, Section, SubSection } from "./types";
 import { generateGrid } from "@/app/lib/data/grids";
+import ModalPopup from "@/components/ModalPopup";
+import { useRouter } from "next/navigation";
 
 const GridCreatePage: React.FC = () => {
   const [sections, setSections] = useState<Section[]>([]);
@@ -14,6 +16,10 @@ const GridCreatePage: React.FC = () => {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [lab, setLab] = useState<string>("");
   const [more, setMore] = useState<string>("");
+  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [modalMessage, setModalMessage] = useState(""); // State to store the modal message
+
+  const router = useRouter();
 
   // Add a new section
   const addSection = () => {
@@ -157,6 +163,13 @@ const GridCreatePage: React.FC = () => {
     }
 
     const result = await generateGrid(gridName, sections);
+    setModalMessage("The grid has been generated! ");
+    setShowModal(true);
+    router.push("/grids");
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
 
   return (
@@ -254,6 +267,11 @@ const GridCreatePage: React.FC = () => {
           Generate grid
         </Button>
       </Form>
+      <ModalPopup
+        show={showModal}
+        message={modalMessage}
+        onClose={handleCloseModal}
+      />
     </Container>
   );
 };
