@@ -43,6 +43,7 @@ const LabCorrectionPage: React.FC = () => {
   useEffect(() => {
     const asyncGetCorrectionData = async () => {
       const tmpCorrectionData = await getCorrectionDataFromLab(labId);
+      console.log("TMPPPPP", tmpCorrectionData);
       setCorrectionData(tmpCorrectionData);
     };
 
@@ -118,7 +119,7 @@ const LabCorrectionPage: React.FC = () => {
             <Accordion.Header>Send feedback</Accordion.Header>
             <Accordion.Body>
               <SendFeedbackToStudent
-                correctionData={correctionData.corrections}
+                correctionData={correctionData}
                 labData={labData}
               ></SendFeedbackToStudent>
             </Accordion.Body>

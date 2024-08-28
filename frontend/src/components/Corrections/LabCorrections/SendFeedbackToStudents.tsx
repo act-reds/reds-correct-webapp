@@ -64,109 +64,169 @@ const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
     console.log("Form Data:", data);
     // You can also handle form submission here, such as sending the data to an API
   };
-
+  console.log("correeeeeee", correctionData);
   return (
     <div>
-      <h3>Send Feedback to Students</h3>
       <Form onSubmit={handleSubmit(onSubmit)}>
-        <Form.Group as={Row} controlId="sender">
-          <Form.Label column sm={2}>
-            Sender
-          </Form.Label>
-          <Col sm={10}>
-            <Controller
-              name="sender"
-              control={control}
-              rules={{ required: "Sender is required" }}
-              render={({ field }) => (
-                <Form.Control
-                  as="select"
-                  {...field}
-                  isInvalid={!!errors.sender}
-                >
-                  <option value="">Select a sender</option>
-                  {assistants.map((assistant) => (
-                    <option key={assistant.id} value={assistant.mail}>
-                      {assistant.mail}
-                    </option>
-                  ))}
-                </Form.Control>
-              )}
-            />
-            {errors.sender && (
-              <Form.Control.Feedback type="invalid">
-                {errors.sender.message}
-              </Form.Control.Feedback>
-            )}
-          </Col>
-        </Form.Group>
-        <Form.Group as={Row} controlId="ccRecipient">
-          <Form.Label column sm={2}>
-            CC recipient
-          </Form.Label>
-          <Col sm={10}>
-            <MultipleSelectChoice
-              label="CC Recipients"
-              assistants={assistants}
-              control={control}
-              setValue={setValue}
-              getValues={getValues}
-              formName="ccRecipients"
-              formValues={getValues("ccRecipients")}
-            />
-          </Col>
-        </Form.Group>
-        <Form.Group as={Row} controlId="emailSubject">
-          <Form.Label column sm={2}>
-            Email Subject
-          </Form.Label>
-          <Col sm={10}>
-            <Controller
-              name="emailSubject"
-              control={control}
-              rules={{ required: "Email Subject is required" }}
-              render={({ field }) => (
-                <Form.Control
-                  type="text"
-                  {...field}
-                  isInvalid={!!errors.emailSubject}
-                />
-              )}
-            />
-            {errors.emailSubject && (
-              <Form.Control.Feedback type="invalid">
-                {errors.emailSubject.message}
-              </Form.Control.Feedback>
-            )}
-          </Col>
-        </Form.Group>
+        <Row className="mb-4">
+          <Form.Group as={Row} controlId="sender">
+            <Form.Label column sm={2}>
+              Sender
+            </Form.Label>
 
-        <Form.Group as={Row} controlId="emailBody">
-          <Form.Label column sm={2}>
-            Email Body
-          </Form.Label>
-          <Col sm={10}>
-            <Controller
-              name="emailBody"
-              control={control}
-              rules={{ required: "Email Body is required" }}
-              render={({ field }) => (
-                <Form.Control
-                  as="textarea"
-                  rows={5}
-                  {...field}
-                  isInvalid={!!errors.emailBody}
-                />
+            <Col sm={10}>
+              <Controller
+                name="sender"
+                control={control}
+                rules={{ required: "Sender is required" }}
+                render={({ field }) => (
+                  <Form.Control
+                    as="select"
+                    {...field}
+                    isInvalid={!!errors.sender}
+                  >
+                    <option value="">Select a sender</option>
+                    {assistants.map((assistant) => (
+                      <option key={assistant.id} value={assistant.mail}>
+                        {assistant.mail}
+                      </option>
+                    ))}
+                  </Form.Control>
+                )}
+              />
+              {errors.sender && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.sender.message}
+                </Form.Control.Feedback>
               )}
-            />
-            {errors.emailBody && (
-              <Form.Control.Feedback type="invalid">
-                {errors.emailBody.message}
-              </Form.Control.Feedback>
-            )}
-          </Col>
-        </Form.Group>
-
+            </Col>
+          </Form.Group>
+        </Row>
+        <Row className="mb-4">
+          <Form.Group as={Row} controlId="ccRecipient">
+            <Form.Label column sm={2}>
+              CC recipient
+            </Form.Label>
+            <Col sm={10}>
+              <MultipleSelectChoice
+                label="CC Recipients"
+                assistants={assistants}
+                control={control}
+                setValue={setValue}
+                getValues={getValues}
+                formName="ccRecipients"
+                formValues={getValues("ccRecipients")}
+              />
+            </Col>
+          </Form.Group>
+        </Row>
+        <Row className="mb-4">
+          <Form.Group as={Row} controlId="emailSubject">
+            <Form.Label column sm={2}>
+              Email Subject
+            </Form.Label>
+            <Col sm={10}>
+              <Controller
+                name="emailSubject"
+                control={control}
+                rules={{ required: "Email Subject is required" }}
+                render={({ field }) => (
+                  <Form.Control
+                    type="text"
+                    {...field}
+                    isInvalid={!!errors.emailSubject}
+                  />
+                )}
+              />
+              {errors.emailSubject && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.emailSubject.message}
+                </Form.Control.Feedback>
+              )}
+            </Col>
+          </Form.Group>
+        </Row>
+        <Row className="mb-4">
+          <Form.Group as={Row} controlId="emailHeader">
+            <Form.Label column sm={2}>
+              Email header
+            </Form.Label>
+            <Col sm={10}>
+              <Controller
+                name="emailBody"
+                control={control}
+                rules={{ required: "Email Body is required" }}
+                render={({ field }) => (
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    {...field}
+                    isInvalid={!!errors.emailBody}
+                  />
+                )}
+              />
+              {errors.emailBody && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.emailBody.message}
+                </Form.Control.Feedback>
+              )}
+            </Col>
+          </Form.Group>
+        </Row>
+        <Row className="mb-4">
+          <Form.Group as={Row} controlId="emailBody">
+            <Form.Label column sm={2}>
+              Email Body
+            </Form.Label>
+            <Col sm={10}>
+              <Controller
+                name="emailBody"
+                control={control}
+                rules={{ required: "Email Body is required" }}
+                render={({ field }) => (
+                  <Form.Control
+                    as="textarea"
+                    rows={5}
+                    {...field}
+                    isInvalid={!!errors.emailBody}
+                  />
+                )}
+              />
+              {errors.emailBody && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.emailBody.message}
+                </Form.Control.Feedback>
+              )}
+            </Col>
+          </Form.Group>
+        </Row>
+        <Row className="mb-4">
+          <Form.Group as={Row} controlId="emailFooter">
+            <Form.Label column sm={2}>
+              Email footer
+            </Form.Label>
+            <Col sm={10}>
+              <Controller
+                name="emailBody"
+                control={control}
+                rules={{ required: "Email Body is required" }}
+                render={({ field }) => (
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    {...field}
+                    isInvalid={!!errors.emailBody}
+                  />
+                )}
+              />
+              {errors.emailBody && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.emailBody.message}
+                </Form.Control.Feedback>
+              )}
+            </Col>
+          </Form.Group>
+        </Row>
         <Button variant="primary" type="submit">
           Send Email
         </Button>
