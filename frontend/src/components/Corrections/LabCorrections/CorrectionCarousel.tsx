@@ -69,7 +69,6 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
   };
 
   useEffect(() => {
-    console.log("changing students _> ", selectedStudents);
     setCorrectionData((prevCorrectionData) =>
       prevCorrectionData.map((item, index) => {
         if (index === activeIndex) {
@@ -88,7 +87,6 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
   const selectedStudentIds = getSelectedStudentIds();
 
   const printActiveIndex = () => {
-    console.log("Active index = ", activeIndex);
     setSelectedStudents(correctionData[activeIndex].students);
     setAssistantReview(correctionData[activeIndex].appreciation);
   };

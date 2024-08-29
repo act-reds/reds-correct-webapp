@@ -136,10 +136,8 @@ const DynamicRectangles: React.FC<{
 
   const handleCloseModal = () => {
     setShowModal(false);
-    console.log("ACTIVE INDEX RECT _> ", activeIndex);
     isModalClosing.current = false;
     const correcton = correctionData[activeIndex];
-    console.log("corrections index test -> ", correcton);
     if (correcton.students.length <= 0) {
       confirmRemoveItem(correcton.itemId);
     } else {
@@ -153,7 +151,6 @@ const DynamicRectangles: React.FC<{
 
   const saveCorrectionData = () => {};
 
-  console.log("CORRECTIOOOONS", correctionData);
   return (
     <>
       <div className="d-flex flex-wrap">

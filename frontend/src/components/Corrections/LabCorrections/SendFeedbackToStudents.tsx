@@ -3,9 +3,11 @@ import { useForm, Controller } from "react-hook-form";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { CorrectionData } from "../../../../types/CorrectionTypes";
 import MultipleSelectChoice from "@/components/MultipleSelectChoice";
+import { useParams } from "next/navigation";
+import { generateMailBody } from "@/app/code/utils/corrections/generateMailBody";
 
 interface SendFeedbackToStudentsProps {
-  correctionData: CorrectionData;
+  correctionData: CorrectionData[];
   labData: any;
 }
 
@@ -13,13 +15,18 @@ interface FormValues {
   sender: string;
   ccRecipients: string[];
   emailSubject: string;
-  emailBody: string;
+  emailHeader: string;
+  emailFooter: string;
 }
 
 const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
   correctionData,
   labData,
 }) => {
+  const params = useParams();
+
+  // Create the default subject using params from the URL
+  const defaultSubject = `[${params.courseName} - ${params.year}] Rendu ${params.labName}`;
   const {
     control,
     handleSubmit,
@@ -30,12 +37,14 @@ const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
     defaultValues: {
       sender: "",
       ccRecipients: [],
-      emailSubject: "",
-      emailBody: "",
+      emailSubject: defaultSubject, // Set default subject
+      emailHeader: `Bonjour,\nVous trouverez dans ce mail (ci-dessous) le détail de la note et les remarques sur votre travail.\n\n`, // Set default header
+      emailFooter: `Ce mail est généré automatiquement et ne nécessite pas de réponse de votre part ;)\nBonne journée.\n`, // Set default footer
     },
   });
 
   const [assistants, setAssistants] = useState<any[]>([]);
+  const [emailBody, setEmailBody] = useState<string>("");
 
   const fetchAssistants = async (labId: number) => {
     try {
@@ -59,12 +68,20 @@ const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
     loadAssistants();
   }, [labData.id]);
 
+  // UseEffect to update emailBody when correctionData changes
+  useEffect(() => {
+    if (correctionData.length > 0) {
+      const generatedBody = `${generateMailBody(correctionData[0], true)}\n\n`;
+      setEmailBody(generatedBody); // Set emailBody to the generated value
+    }
+  }, [correctionData]);
+
   // Form submission handler
   const onSubmit = (data: FormValues) => {
     console.log("Form Data:", data);
     // You can also handle form submission here, such as sending the data to an API
   };
-  console.log("correeeeeee", correctionData);
+
   return (
     <div>
       <Form onSubmit={handleSubmit(onSubmit)}>
@@ -153,7 +170,7 @@ const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
             </Form.Label>
             <Col sm={10}>
               <Controller
-                name="emailBody"
+                name="emailHeader"
                 control={control}
                 rules={{ required: "Email Body is required" }}
                 render={({ field }) => (
@@ -161,13 +178,13 @@ const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
                     as="textarea"
                     rows={2}
                     {...field}
-                    isInvalid={!!errors.emailBody}
+                    isInvalid={!!errors.emailHeader}
                   />
                 )}
               />
-              {errors.emailBody && (
+              {errors.emailHeader && (
                 <Form.Control.Feedback type="invalid">
-                  {errors.emailBody.message}
+                  {errors.emailHeader.message}
                 </Form.Control.Feedback>
               )}
             </Col>
@@ -179,24 +196,17 @@ const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
               Email Body
             </Form.Label>
             <Col sm={10}>
-              <Controller
-                name="emailBody"
-                control={control}
-                rules={{ required: "Email Body is required" }}
-                render={({ field }) => (
-                  <Form.Control
-                    as="textarea"
-                    rows={5}
-                    {...field}
-                    isInvalid={!!errors.emailBody}
-                  />
-                )}
-              />
-              {errors.emailBody && (
-                <Form.Control.Feedback type="invalid">
-                  {errors.emailBody.message}
-                </Form.Control.Feedback>
-              )}
+              {/* Display the email body as plain text with a light gray background */}
+              <div
+                className="p-3 rounded"
+                style={{
+                  backgroundColor: "#b5b7c4", // Light gray background (Bootstrap light color)
+                  whiteSpace: "pre-wrap",
+                  border: "1px solid #b5b7c4",
+                }}
+              >
+                {emailBody}
+              </div>
             </Col>
           </Form.Group>
         </Row>
@@ -207,7 +217,7 @@ const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
             </Form.Label>
             <Col sm={10}>
               <Controller
-                name="emailBody"
+                name="emailFooter"
                 control={control}
                 rules={{ required: "Email Body is required" }}
                 render={({ field }) => (
@@ -215,13 +225,13 @@ const SendFeedbackToStudents: React.FC<SendFeedbackToStudentsProps> = ({
                     as="textarea"
                     rows={2}
                     {...field}
-                    isInvalid={!!errors.emailBody}
+                    isInvalid={!!errors.emailFooter}
                   />
                 )}
               />
-              {errors.emailBody && (
+              {errors.emailFooter && (
                 <Form.Control.Feedback type="invalid">
-                  {errors.emailBody.message}
+                  {errors.emailFooter.message}
                 </Form.Control.Feedback>
               )}
             </Col>
