@@ -44,7 +44,7 @@ const MultipleSelectChoice: React.FC<MultipleSelectChoiceProps> = ({
 
   return (
     <>
-      <InputGroup className="mb-3">
+      <InputGroup>
         <FormControl
           as="select"
           onChange={(e) => handleAddCC(e.target.value)}

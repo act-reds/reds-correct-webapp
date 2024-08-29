@@ -62,14 +62,17 @@ const FilterableSelect: React.FC<FilterableSelectProps> = ({
           { id: option.id, label: selectedName },
         ]);
         setSelectedItem("");
+        onSelectionChange([...selectedItems, option]);
       }
     }
   };
 
   const handleRemoveItem = (id: number) => {
-    const updatedSelection = selectedItems.filter((item) => item.id !== id);
-    setSelectedItems(updatedSelection);
-    onSelectionChange(updatedSelection); // Notify parent component
+    if (selectedItems.length > 1) {
+      const updatedSelection = selectedItems.filter((item) => item.id !== id);
+      setSelectedItems(updatedSelection);
+      onSelectionChange(updatedSelection); // Notify parent component
+    }
   };
 
   return (

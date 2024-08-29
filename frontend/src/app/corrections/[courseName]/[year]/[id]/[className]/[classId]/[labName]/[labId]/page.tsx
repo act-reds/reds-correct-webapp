@@ -27,7 +27,6 @@ const LabCorrectionPage: React.FC = () => {
     try {
       const data = await getLabData(labId);
       setLabData(data);
-      console.log("data", data);
       if (data.grid) {
         setActiveAccordionKey("1");
       }
@@ -43,7 +42,7 @@ const LabCorrectionPage: React.FC = () => {
   useEffect(() => {
     const asyncGetCorrectionData = async () => {
       const tmpCorrectionData = await getCorrectionDataFromLab(labId);
-      setCorrectionData(tmpCorrectionData);
+      setCorrectionData(tmpCorrectionData.corrections);
     };
 
     fetchLabData();
@@ -118,7 +117,7 @@ const LabCorrectionPage: React.FC = () => {
             <Accordion.Header>Send feedback</Accordion.Header>
             <Accordion.Body>
               <SendFeedbackToStudent
-                correctionData={correctionData.corrections}
+                correctionData={correctionData}
                 labData={labData}
               ></SendFeedbackToStudent>
             </Accordion.Body>

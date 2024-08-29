@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Carousel, Button, Form, ListGroup } from "react-bootstrap";
 import SectionTableWithInput from "@/components/Grid/SectionTableWithInput";
 import SectionTable from "@/components/Grid/SectionTable";
-import { CorrectionData, Section, Student } from "../../../../types/CorrectionTypes";
+import {
+  CorrectionData,
+  Section,
+  Student,
+} from "../../../../types/CorrectionTypes";
 import "./DynamicRectangles.css";
 
 interface CorrectionCarouselProps {
@@ -21,7 +25,7 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
   onSelect,
   labId,
   sections,
-  students, 
+  students,
   setCorrectionData,
 }) => {
   const [selectedStudents, setSelectedStudents] = useState<Student[]>(
@@ -43,9 +47,7 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
   const handleSelectStudent = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedName = event.target.value;
     if (selectedName) {
-      const student = students.find(
-        (stu: any) => stu.name === selectedName
-      );
+      const student = students.find((stu: any) => stu.name === selectedName);
       if (student && !selectedStudents.some((s) => s.id === student.id)) {
         setSelectedStudents((prev) => [
           ...prev,
@@ -79,10 +81,15 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
         return item;
       })
     );
-  }, [selectedStudents, assistantReview, activeIndex]);
+  }, [selectedStudents, assistantReview]);
 
   // Get a Set of IDs of all students already selected
   const selectedStudentIds = getSelectedStudentIds();
+
+  const printActiveIndex = () => {
+    setSelectedStudents(correctionData[activeIndex].students);
+    setAssistantReview(correctionData[activeIndex].appreciation);
+  };
 
   return (
     <div>
@@ -91,6 +98,7 @@ const CorrectionCarousel: React.FC<CorrectionCarouselProps> = ({
         activeIndex={activeIndex}
         onSelect={onSelect}
         interval={null}
+        onSlide={printActiveIndex}
       >
         {correctionData.map((correction, index) => (
           <Carousel.Item key={correction.itemId}>
