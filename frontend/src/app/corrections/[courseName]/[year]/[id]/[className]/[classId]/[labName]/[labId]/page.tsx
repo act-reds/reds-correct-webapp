@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Accordion, Button } from "react-bootstrap";
 import { CorrectionData } from "../../../../../../../../../../types/CorrectionTypes";
 import { getCorrectionDataFromLab } from "@/app/lib/data/correction";
+import GenerateFiles from "@/components/Corrections/LabCorrections/GenerateFiles";
 
 const LabCorrectionPage: React.FC = () => {
   const router = useRouter();
@@ -40,14 +41,18 @@ const LabCorrectionPage: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchLabData();
+  }, [labId]);
+
+  useEffect(() => {
     const asyncGetCorrectionData = async () => {
       const tmpCorrectionData = await getCorrectionDataFromLab(labId);
       setCorrectionData(tmpCorrectionData.corrections);
     };
 
-    fetchLabData();
     asyncGetCorrectionData();
-  }, [labId]);
+
+  }, [activeAccordionKey]);
 
   const handleAccordionClick = (eventKey: string | null) => {
     setActiveAccordionKey(eventKey);
@@ -81,7 +86,7 @@ const LabCorrectionPage: React.FC = () => {
       console.error("Error:", error);
     }
   };
-
+  
   return (
     <>
       <Accordion activeKey={activeAccordionKey} onSelect={handleAccordionClick}>
@@ -113,7 +118,18 @@ const LabCorrectionPage: React.FC = () => {
         )}
 
         {labData && labData.readyToSend && (
+          <>
           <Accordion.Item eventKey="2">
+          <Accordion.Header>Generate files</Accordion.Header>
+          <Accordion.Body>
+            <GenerateFiles
+            correctionData={correctionData}>
+
+            </GenerateFiles>
+          </Accordion.Body>
+        </Accordion.Item>
+
+          <Accordion.Item eventKey="3">
             <Accordion.Header>Send feedback</Accordion.Header>
             <Accordion.Body>
               <SendFeedbackToStudent
@@ -122,6 +138,7 @@ const LabCorrectionPage: React.FC = () => {
               ></SendFeedbackToStudent>
             </Accordion.Body>
           </Accordion.Item>
+          </>
         )}
       </Accordion>
     </>

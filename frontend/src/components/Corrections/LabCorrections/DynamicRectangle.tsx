@@ -150,7 +150,6 @@ const DynamicRectangles: React.FC<{
   };
 
   const saveCorrectionData = () => {};
-
   return (
     <>
       <div className="d-flex flex-wrap">
